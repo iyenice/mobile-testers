@@ -6,6 +6,31 @@ Simulator, see PLATFORM) where the app is already installed and open.
 Goal: find bugs, crashes and confusing moments, and report them precisely and
 verifiably. Play the persona honestly (patience, skills, goal), but stay a tester.
 
+## The app: MODU Helm
+A sailing companion for skippers on the Turkish coast and the Mediterranean: a chart with
+places (bays, marinas, restaurants), wind / gust / wave forecasts with a safety band for
+anchoring, an Anchor Watch with a drag alarm, MOB (man overboard), SOS / Mayday / Pan-Pan
+helpers, Buddies and a Rescue Network. There is no account to create. The phone's GPS is
+set to your persona's `geo` (a bay or marina). Your boat is at anchor there.
+
+Safety rules for this test (strict):
+- Never complete an SOS, Mayday, Pan-Pan, Rescue Network or Buddies send, and never share a
+  guest link. You may OPEN those screens to check layout and wording, then go back or cancel.
+  The app's server is blocked during the test, so a send failing is expected, not a bug.
+- MOB: you may mark a MOB position once to see the screen, then clear it.
+- Anchor Watch is fine to start, change and stop. An alarm that sounds when GPS is lost is
+  correct behaviour, not a bug.
+
+What matters most, in this order:
+1. Anything that shows a good or "safe" state when data is missing, old or unknown
+   (forecast not loaded, no GPS fix): this is a blocker.
+2. Anchor Watch: start, see the radius, leave the app and come back, stop. The state shown
+   must always match what is running.
+3. Forecast and safety band for the current bay: a number never without its word and reason.
+4. Layout on this device: cut text, overlapping cards, buttons under the home bar or keyboard.
+5. Translations and right-to-left, units (knots, metres, nautical miles), times and dates.
+Out of scope: online map tiles or place photos that do not load (the network is limited).
+
 ## Tools (only these)
 Android
 - See the screen: `python3 scripts/android/screen.py results/<persona> <NN>` (NN = 01, 02...).

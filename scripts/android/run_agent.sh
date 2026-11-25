@@ -26,7 +26,16 @@ export APP_ID
 adb install -r -g app.apk || adb install -r app.apk
 adb shell settings put system font_scale "${FONT_SCALE:-1.0}"
 [ "${THEME:-light}" = dark ] && adb shell cmd uimode night yes
-adb emu geo fix "${GEO#*,}" "${GEO%,*}" >/dev/null 2>&1   # longitude first
+# Live GPS like on open water: a fresh fix every second with 9 satellites, the boat
+# swinging about 3 m at anchor (one fix only goes stale and fails GPS-liveness checks)
+LAT=${GEO%,*}; LON=${GEO#*,}; rm -f /tmp/stop-gps
+( n=0; while [ ! -f /tmp/stop-gps ]; do
+    d=$(awk -v n=$n 'BEGIN{printf "%.6f", 0.00003*sin(n/10)}')
+    adb emu geo fix "$(awk -v a="$LON" -v d="$d" 'BEGIN{printf "%.6f", a+d}')" \
+                    "$(awk -v a="$LAT" -v d="$d" 'BEGIN{printf "%.6f", a+d}')" 2 9 >/dev/null 2>&1
+    n=$((n + 1)); sleep 1
+  done ) &
+GPS=$!
 adb shell monkey -p "$APP_ID" -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1
 adb logcat -c; sleep 5
 # 4. Optional screen recording, kept in results/ (encrypted like the rest)
@@ -52,6 +61,7 @@ claude -p "Read $BRIEF and personas.json, then do the mission until the final re
   --allowedTools "Bash(adb:*),Bash(python3 scripts/android/screen.py:*),Bash(python3 scripts/android/type.py:*),Bash(sleep:*),Bash(ls:*),Bash(cat:*),Bash(mkdir:*),Read,Write,Edit" \
   > results/agent-output.json 2> results/agent-errors.txt
 CODE=$?
+touch /tmp/stop-gps; kill "$GPS" 2>/dev/null
 python3 scripts/agent_status.py results/agent-output.json results/agent-errors.txt "$PERSONA" || true
 if [ -n "$REC" ]; then
   touch /tmp/stop-rec; adb shell pkill -INT screenrecord; sleep 4; kill "$REC" 2>/dev/null

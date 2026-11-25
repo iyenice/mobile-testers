@@ -11,7 +11,10 @@ A sailing companion for skippers on the Turkish coast and the Mediterranean: a c
 places (bays, marinas, restaurants), wind / gust / wave forecasts with a safety band for
 anchoring, an Anchor Watch with a drag alarm, MOB (man overboard), SOS / Mayday / Pan-Pan
 helpers, Buddies and a Rescue Network. There is no account to create. The phone's GPS is
-set to your persona's `geo` (a bay or marina). Your boat is at anchor there.
+set to your persona's `geo` (a bay or marina). Your boat is at anchor there. GPS is live,
+like on open water: a fresh fix every second, swinging a few metres. So "no GPS fix",
+"waiting for GPS" or an old "last fix" after the first minute IS a bug: report it.
+Do not change the GPS position yourself.
 
 Safety rules for this test (strict):
 - Never complete an SOS, Mayday, Pan-Pan, Rescue Network or Buddies send, and never share a

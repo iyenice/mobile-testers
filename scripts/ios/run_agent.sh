@@ -10,6 +10,10 @@ done
 xcrun simctl ui "$UDID" appearance "${THEME:-light}"
 xcrun simctl ui "$UDID" content_size "${TEXT_SIZE:-large}"
 xcrun simctl location "$UDID" set "$GEO" 2>/dev/null || true
+# Live GPS like on open water: a route that swings about 3 m back and forth at anchor,
+# one update per second for about 2 hours (a single 'set' never sends a fresh fix again)
+WP=$(awk -v g="$GEO" 'BEGIN{split(g,p,","); for(i=0;i<720;i++){d=(i%2)?0.00003:0; printf "%.6f,%.6f ", p[1]+d, p[2]+d}}')
+xcrun simctl location "$UDID" start --speed=0.5 --interval=1 $WP 2>/dev/null || true
 APP=$(find app -maxdepth 2 -name '*.app' -type d | head -1)
 xcrun simctl install "$UDID" "$APP" || { echo "install failed"; exit 1; }
 # The bundle id inside the app wins: it often differs from the Android package

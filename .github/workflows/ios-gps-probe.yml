@@ -17,7 +17,7 @@ on:
         description: App folder (where package.json is)
         default: native
       ios_build:
-        description: iOS build command (Debug build: Capacitor then forwards the web console)
+        description: "iOS build command (Debug build, so Capacitor forwards the web console)"
         default: './sync-web.sh --no-chart && (npm ci || npm install) && npx cap sync ios && cd ios/App && xcodebuild build -project App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination "generic/platform=iOS Simulator" -derivedDataPath ../DerivedData EXCLUDED_ARCHS=x86_64 ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO'
       ios_app_path:
         description: Path of the Simulator .app produced by ios_build

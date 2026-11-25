@@ -17,11 +17,15 @@ xcrun simctl spawn "$UDID" log stream --style compact \
   > "$R/system-location-log.txt" 2>&1 &
 LOGP=$!
 
-# The same route as scripts/ios/run_agent.sh
-xcrun simctl location "$UDID" set "$GEO"
-WP=$(awk -v g="$GEO" 'BEGIN{split(g,p,","); for(i=0;i<720;i++){d=(i%2)?0.00003:0; printf "%.6f,%.6f ", p[1]+d, p[2]+d}}')
-xcrun simctl location "$UDID" start --speed=0.5 --interval=1 $WP > "$R/route.txt" 2>&1
-mark "route started"
+# The testers' GPS feed (scripts/ios/run_agent.sh); GPS_FEED=route for the old route, to compare
+if [ "${GPS_FEED:-set}" = route ]; then
+  xcrun simctl location "$UDID" set "$GEO"
+  WP=$(awk -v g="$GEO" 'BEGIN{split(g,p,","); for(i=0;i<720;i++){d=(i%2)?0.00003:0; printf "%.6f,%.6f ", p[1]+d, p[2]+d}}')
+  xcrun simctl location "$UDID" start --speed=0.5 --interval=1 $WP > "$R/route.txt" 2>&1
+else
+  export GPS_STOP="$RUNNER_TEMP/stop-gps"; bash scripts/ios/gps_feed.sh "$GEO" & GPS=$!
+fi
+mark "GPS feed started (${GPS_FEED:-set})"
 xcrun simctl install "$UDID" "$APP" || { mark "install failed"; exit 1; }
 BID=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist" 2>/dev/null); [ -n "$BID" ] && APP_ID=$BID
 
@@ -58,6 +62,6 @@ TP=$!
 xcrun simctl openurl "$UDID" "http://localhost:8765/geotest.html"
 for t in 450 480 530 580; do at $t; shot "4-safari-$((t - 430))s"; done
 wait $TP 2>/dev/null
-kill $HP $LOGP 2>/dev/null
+kill $HP $LOGP 2>/dev/null; [ -n "${GPS_STOP:-}" ] && touch "$GPS_STOP"
 grep -a "GEOPROBE" "$R"/console-*.txt | sed 's/.*GEOPROBE/GP/' > "$R/probe-lines.txt" || true
 mark "done"

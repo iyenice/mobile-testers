@@ -34,6 +34,9 @@ on:
       geo:
         description: GPS position lat,lon
         default: "37.000000,27.250000"
+      gps_feed:
+        description: "GPS feed: set (a new position every second, as the testers) or route (the old simctl route)"
+        default: set
       block_hosts:
         description: Hosts the app must not reach, space-separated
         default: "modumarine.com www.modumarine.com app.posthog.com eu.i.posthog.com us.i.posthog.com graph.facebook.com api.mixpanel.com api2.amplitude.com"
@@ -90,6 +93,7 @@ jobs:
         env:
           APP_ID: ${{ inputs.app_id }}
           GEO: ${{ inputs.geo }}
+          GPS_FEED: ${{ inputs.gps_feed }}
         run: |
           mkdir -p results/gps-probe && echo "$DEVICE" > results/gps-probe/device.txt
           bash scripts/ios/probe/run_probe.sh > results/gps-probe/run.txt 2>&1

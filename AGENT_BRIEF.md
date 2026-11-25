@@ -34,6 +34,20 @@ What matters most, in this order:
 5. Translations and right-to-left, units (knots, metres, nautical miles), times and dates.
 Out of scope: online map tiles or place photos that do not load (the network is limited).
 
+Already known (do NOT report these again; one line "still there" in the summary is enough):
+the app is English only (no translation, no right-to-left, system dark theme ignored); the second
+"localhost would like to use your location" prompt; "Find My Marina by GPS" failing on the first tap;
+"Daylight until" 3 h early before the forecast loads; the red "Anchoring N/10 · Shelter Tonight" pill;
+the "Choose your home marina" error that stays; usage statistics pre-ticked; the tablet narrow column.
+Spend your budget on THIS device instead: every tab and sheet (Home, Weather, Trip, Cruise, Places,
+Buddies, Anchor, Settings, More, MOB / SOS screens opened then closed), leave the app and come back,
+and check every screen for cut text, overlaps, buttons under the notch, home bar or keyboard, and text
+that does not grow with the device's text size. Android only: look at 2-3 screens in landscape
+(`adb shell settings put system accelerometer_rotation 0` then `adb shell settings put system
+user_rotation 1`; back with `user_rotation 0`). For this run the budget is about 45 actions.
+Anchor Watch: if Alarm now arms (it may say it is waiting for a fix first), check its state over
+2 minutes, after leaving the app and coming back, and that Stop works.
+
 ## Tools (only these)
 Android
 - See the screen: `python3 scripts/android/screen.py results/<persona> <NN>` (NN = 01, 02...).

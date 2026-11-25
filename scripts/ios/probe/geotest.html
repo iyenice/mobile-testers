@@ -1,0 +1,4 @@
+<!doctype html><meta name=viewport content="width=device-width"><body style="font:20px -apple-system;padding:20px">
+<b>watchPosition test</b><div id=n>waiting</div><pre id=l></pre><script>
+var c=0,t0=Date.now();navigator.geolocation.watchPosition(function(p){c++;document.getElementById('n').textContent='fixes: '+c+' last at '+Math.round((Date.now()-t0)/1000)+'s';document.getElementById('l').textContent=p.coords.latitude.toFixed(6)+','+p.coords.longitude.toFixed(6)+' acc '+p.coords.accuracy;},function(e){document.getElementById('n').textContent='error '+e.code+' '+e.message},{enableHighAccuracy:true,maximumAge:1000,timeout:20000});
+setInterval(function(){document.title=c},1000);</script>

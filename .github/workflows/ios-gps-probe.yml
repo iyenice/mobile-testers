@@ -1,0 +1,102 @@
+# Diagnostic, no AI agent: does the app's web view keep getting GPS fixes on an iOS Simulator
+# with the testers' moving route? Builds the app, adds a probe that logs every position, answers
+# the location prompts, then compares with Safari. About 10 minutes on one Mac, no model usage.
+# Everything readable is encrypted with results_public.pem. Decrypt with: bash scripts/collect.sh <run id>
+name: iOS GPS probe
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_repo:
+        description: owner/name of the app repo
+        default: iyenice/modu-helm
+      ref:
+        description: Branch, tag or full SHA of the app repo
+        default: main
+      app_dir:
+        description: App folder (where package.json is)
+        default: native
+      ios_build:
+        description: iOS build command (Debug build: Capacitor then forwards the web console)
+        default: './sync-web.sh --no-chart && (npm ci || npm install) && npx cap sync ios && cd ios/App && xcodebuild build -project App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination "generic/platform=iOS Simulator" -derivedDataPath ../DerivedData EXCLUDED_ARCHS=x86_64 ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO'
+      ios_app_path:
+        description: Path of the Simulator .app produced by ios_build
+        default: ios/DerivedData/Build/Products/Debug-iphonesimulator/App.app
+      app_id:
+        description: iOS bundle id
+        default: com.modumarine.helm
+      simulator:
+        description: Simulator model
+        default: iPhone 16 Plus
+      ios:
+        description: iOS major version
+        default: "18"
+      geo:
+        description: GPS position lat,lon
+        default: "37.000000,27.250000"
+      block_hosts:
+        description: Hosts the app must not reach, space-separated
+        default: "modumarine.com www.modumarine.com app.posthog.com eu.i.posthog.com us.i.posthog.com graph.facebook.com api.mixpanel.com api2.amplitude.com"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check setup
+        run: test -s results_public.pem || { echo "::error::results_public.pem is missing"; exit 1; }
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.source_repo }}
+          ref: ${{ inputs.ref }}
+          token: ${{ secrets.SOURCE_REPO_TOKEN || github.token }}
+          path: src
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Latest Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+      - name: Build Simulator .app (log kept private)
+        env:
+          BUILD_COMMAND: ${{ inputs.ios_build }}
+          ARTIFACT: ${{ inputs.ios_app_path }}
+        run: |
+          bash scripts/build/ios.sh "src/${{ inputs.app_dir }}" custom
+          mkdir -p app && tar xzf app-ios.tgz -C app
+      - name: Tools (AXe)
+        run: brew install -q cameroncooke/axe/axe
+      - name: Block hosts
+        env: { HOSTS: "${{ inputs.block_hosts }}" }
+        run: |
+          IPS=""
+          for h in $HOSTS; do
+            IPS="$IPS $(dig +short A "$h" @8.8.8.8 | grep -E '^[0-9.]+$' | tr '\n' ' ')"
+            printf '0.0.0.0 %s\n:: %s\n' "$h" "$h" | sudo tee -a /etc/hosts >/dev/null
+          done
+          [ -n "${IPS// /}" ] && echo "block drop out quick proto { tcp udp } to { $(echo $IPS | tr ' ' ',') }" | sudo pfctl -a com.apple/agentblock -f - 2>/dev/null
+          sudo pfctl -E 2>/dev/null || true
+          sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder || true
+      - name: Simulator
+        run: |
+          defaults write com.apple.iphonesimulator ConnectHardwareKeyboard -bool false
+          python3 scripts/ios/create_sim.py "${{ inputs.simulator }}" "${{ inputs.ios }}" | tee -a "$GITHUB_ENV" > "$RUNNER_TEMP/sim.env"
+          UDID=$(grep '^UDID=' "$RUNNER_TEMP/sim.env" | cut -d= -f2)
+          xcrun simctl boot "$UDID" && xcrun simctl bootstatus "$UDID" -b >/dev/null
+      - name: Probe
+        env:
+          APP_ID: ${{ inputs.app_id }}
+          GEO: ${{ inputs.geo }}
+        run: |
+          mkdir -p results/gps-probe && echo "$DEVICE" > results/gps-probe/device.txt
+          bash scripts/ios/probe/run_probe.sh > results/gps-probe/run.txt 2>&1
+          echo "Probe finished"
+      - name: Encrypt results
+        if: always()
+        run: bash scripts/encrypt_results.sh gps-probe
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: results-gps-probe, path: results.enc/, retention-days: 14 }

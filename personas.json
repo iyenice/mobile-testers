@@ -191,7 +191,7 @@
     ],
     "device": {
       "simulator": "iPhone SE (3rd generation)",
-      "ios": 18,
+      "ios": 26,
       "text_size": "large",
       "theme": "light"
     }
@@ -208,7 +208,7 @@
     ],
     "device": {
       "simulator": "iPad Air 11-inch (M2)",
-      "ios": 18,
+      "ios": 26,
       "text_size": "accessibility-extra-large",
       "theme": "dark"
     }
@@ -225,7 +225,7 @@
     ],
     "device": {
       "simulator": "iPhone 16 Pro Max",
-      "ios": 18,
+      "ios": 26,
       "text_size": "extra-extra-extra-large",
       "theme": "light"
     }
@@ -242,7 +242,7 @@
     ],
     "device": {
       "simulator": "iPhone 16",
-      "ios": 18,
+      "ios": 26,
       "text_size": "medium",
       "theme": "dark"
     }
@@ -259,7 +259,7 @@
     ],
     "device": {
       "simulator": "iPhone 16 Pro",
-      "ios": 18,
+      "ios": 26,
       "text_size": "large",
       "theme": "light"
     }
@@ -276,7 +276,7 @@
     ],
     "device": {
       "simulator": "iPad mini (A17 Pro)",
-      "ios": 18,
+      "ios": 26,
       "text_size": "large",
       "theme": "light"
     }
@@ -293,7 +293,7 @@
     ],
     "device": {
       "simulator": "iPhone SE (3rd generation)",
-      "ios": 18,
+      "ios": 26,
       "text_size": "accessibility-extra-extra-extra-large",
       "theme": "dark"
     }
@@ -310,7 +310,7 @@
     ],
     "device": {
       "simulator": "iPhone 16 Plus",
-      "ios": 18,
+      "ios": 26,
       "text_size": "accessibility-medium",
       "theme": "light"
     }
@@ -327,7 +327,7 @@
     ],
     "device": {
       "simulator": "iPad Pro 13-inch (M4)",
-      "ios": 18,
+      "ios": 26,
       "text_size": "small",
       "theme": "dark"
     }
@@ -344,7 +344,7 @@
     ],
     "device": {
       "simulator": "iPhone 16e",
-      "ios": 18,
+      "ios": 26,
       "text_size": "extra-large",
       "theme": "light"
     }

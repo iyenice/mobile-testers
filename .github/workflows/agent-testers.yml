@@ -56,6 +56,9 @@ on:
       llm_base_url:
         description: "Optional: any Anthropic-compatible API instead of Claude (OpenRouter, DeepSeek, Kimi, GLM...), key in the LLM_API_KEY secret. Quality depends on how well the model reads screenshots and reasons: docs/cheaper-models.md"
         default: ""
+      ios_runner:
+        description: GitHub Mac runner for iOS (macos-26 has iOS 26; the iOS 18 simulator on macos-15 stops sending GPS to web views)
+        default: macos-26
       block_hosts:
         description: Hosts the app must not reach during tests (analytics, ads), space-separated
         default: "app.posthog.com eu.i.posthog.com us.i.posthog.com graph.facebook.com api.mixpanel.com api2.amplitude.com"
@@ -137,7 +140,7 @@ jobs:
   build-ios:
     needs: plan
     if: needs.plan.outputs.ios != '[]'
-    runs-on: macos-15
+    runs-on: ${{ inputs.ios_runner || 'macos-26' }}
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
@@ -268,7 +271,7 @@ jobs:
 
   ios:
     needs: [plan, build-ios]
-    runs-on: macos-15
+    runs-on: ${{ inputs.ios_runner || 'macos-26' }}
     timeout-minutes: 120
     strategy:
       fail-fast: false
